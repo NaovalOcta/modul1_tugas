@@ -1,7 +1,12 @@
+package books;
+
+import books.Book;
+
 public class TextBook extends Book {
-    private String category;
+    private String category = "";
 
     public TextBook(String bookId, String title, String author, int stock) {
         super(bookId, title, author, stock);
+        setCategory(this.category);
     }
 }

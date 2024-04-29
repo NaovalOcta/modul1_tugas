@@ -1,7 +1,14 @@
+package data;
+
+import books.HistoryBook;
+import books.StoryBook;
+import books.TextBook;
+import util.iMenu;
+
 import java.util.Random;
 import java.util.Scanner;
 
-public class Admin extends User {
+public class Admin extends User implements iMenu {
     private static String adminUsername = "Admin";
     private static String adminPassword = "Admin";
     private static String[][] studentList = new String[100][100];
@@ -11,7 +18,59 @@ public class Admin extends User {
         return studentList;
     }
 
-    public static void addStudent() {
+    @Override
+    public void menu() {
+        Scanner objScanner = new Scanner(System.in);
+
+        System.out.println("====== Admin Menu ======");
+        System.out.println("1. Add Student");
+        System.out.println("2. Add Book");
+        System.out.println("3. Display Registered Student");
+        System.out.println("4. Display Available Books");
+        System.out.println("5. Logout");
+        System.out.print("Choose menu (1-5): ");
+        int choice = objScanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                this.addStudent();
+                break;
+            case 2:
+                System.out.println("1. Story Book");
+                System.out.println("2. History Book");
+                System.out.println("3. Text Book");
+                System.out.print("Choose category (1-3): ");
+                int chooseCategory = objScanner.nextInt();
+
+                switch (chooseCategory) {
+                    case 1:
+                        Admin.inputBook("Story Book");
+                        break;
+                    case 2:
+                        Admin.inputBook("History Book");
+                        break;
+                    case 3:
+                        Admin.inputBook("Text Book");
+                        break;
+                    default:
+                        System.out.println("Angka yang anda masukkan salah!");
+                        break;
+                }
+                break;
+            case 3:
+                this.displayStudents();
+                break;
+            case 4:
+                Admin objAdmin = new Admin();
+
+                objAdmin.displayBooks();
+                break;
+            case 5:
+                Student.logout();
+                break;
+        }
+    }
+    public void addStudent() {
         Scanner objScanner = new Scanner(System.in);
 
         boolean isNIMExist = false;
@@ -48,9 +107,9 @@ public class Admin extends User {
                     studentList[studentListIndex][3] = programStudi;
 
                     studentListIndex += 1;
-                    Main.menuAdmin();
+                    this.menu();
                 } else {
-                    System.out.println("NIM valid tetapi NIM sudah terdapat di dalam data.");
+                    System.out.println("NIM valid tetapi NIM sudah terdapat di dalam data");
                 }
             } else {
                 System.out.println("NIM tidak valid. Harus berjumlah 15 digit.");
@@ -60,7 +119,7 @@ public class Admin extends User {
     public static void inputBook(String category) {
         Scanner objScanner = new Scanner(System.in);
 
-        if (category == "Story Book") {
+        if (category.equals("Story Book")) {
             StoryBook objStoryBook = new StoryBook("", "", "", 0);
 
             // input data dari user
@@ -77,7 +136,7 @@ public class Admin extends User {
             objStoryBook.setCategory(category);
 
             User.addBook();
-        } else if (category == "History Book") {
+        } else if (category.equals("History Book")) {
             HistoryBook objHistoryBook = new HistoryBook("", "", "",0);
 
             // input data dari user
@@ -94,7 +153,7 @@ public class Admin extends User {
             objHistoryBook.setCategory(category);
 
             User.addBook();
-        } else if (category == "Text Book") {
+        } else if (category.equals("Text Book")) {
             TextBook objTextBook = new TextBook("", "", "",0);
 
             // input data dari user
@@ -119,9 +178,9 @@ public class Admin extends User {
     @Override
     public void displayBooks() {
         super.displayBooks();
-        Main.menuAdmin();
+        this.menu();
     }
-    public static void displayStudents() {
+    public void displayStudents() {
         if (studentList == null || studentList.length == 0) {
             System.out.println("Tidak terdapat data student!");
         } else {
@@ -133,7 +192,7 @@ public class Admin extends User {
                 System.out.println("Program Studi: " + studentList[i][3]);
                 System.out.println("");
             }
-            Main.menuAdmin();
+            this.menu();
         }
     }
     public static boolean isAdmin(String inputUsername, String inputPassword) {

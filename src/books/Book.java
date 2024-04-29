@@ -1,3 +1,5 @@
+package books;
+
 public class Book {
     private static String bookId;
     private static String title;
