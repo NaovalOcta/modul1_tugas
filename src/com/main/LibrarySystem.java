@@ -1,107 +1,122 @@
 package com.main;
 
 import data.Admin;
-import data.Student;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
+import data.Student;
+import exception.custom.IllegalAdminAccess;
+
 public class LibrarySystem {
-    public void menu() {
-        Admin objAdmin = new Admin();
-        Scanner objScanner = new Scanner(System.in);
+    private static Admin objAdmin = new Admin();
+    private static Scanner objScanner = new Scanner(System.in);
+    private static ArrayList<String> nimStudentList = new ArrayList<>();
+    private static String nimStudentListHolder;
 
-        System.out.println("====== Library System ======");
-        System.out.println("1. Login as Student");
-        System.out.println("2. Login as Admin");
-        System.out.println("3. Exit");
-        System.out.print("Choose menu (1-3): ");
-        int choice = objScanner.nextInt();
+    public ArrayList<String> getNimStudentList() {
+        return nimStudentList;
+    }
 
-        switch (choice) {
-            case 1:
-                inputNim();
-                break;
-            case 2:
-                System.out.print("Masukkan username: ");
-                String inputUsername = objScanner.next();
-                System.out.print("Masukkan password: ");
-                String inputPassword = objScanner.next();
+    public void setNimStudentList(String nimStudent) {
+        nimStudentList.add(nimStudent);
+    }
 
-                if (Admin.isAdmin(inputUsername, inputPassword)) {
-                    objAdmin.menu();
-                } else {
-                    System.out.println("Username or password invalid");
-                    this.menu();
+    public String getNimStudentListHolder() {
+        return nimStudentListHolder;
+    }
+
+    public static void menu() {
+        try {
+            while (true) {
+                System.out.println("====== Library System ======");
+                System.out.println("1. Login as Student");
+                System.out.println("2. Login as Admin");
+                System.out.println("3. Exit");
+                System.out.print("Choose menu (1-3): ");
+                int menuChoice = objScanner.nextInt();
+
+                switch (menuChoice) {
+                    case 1:
+                        inputNim();
+                        break;
+                    case 2:
+                        System.out.print("Masukkan Username (admin): ");
+                        String username = objScanner.next();
+                        System.out.print("Masukkan Password (admin): ");
+                        String password = objScanner.next();
+                        if (objAdmin.isAdmin(username, password)) {
+                            System.out.println("Login berhasil sebagai Admin\n");
+                            objAdmin.menu();
+                        } else {
+                            System.out.println("User Admin tidak ditemukan\n");
+                        }
+                        break;
+                    case 3:
+                        System.out.println("Keluar dari program...");
+                        System.exit(0);
+                        break;
+                    default:
+                        System.out.println("Pilihan tidak valid!");
                 }
-                break;
-            case 3:
-                System.out.println("Keluar dari program...");
-                System.exit(0);
-                break;
+            }
+        } catch (IllegalAdminAccess e) {
+            System.err.println(e);
         }
     }
 
-    public void inputNim() {
-        Student objStudent = new Student("", "", "", "");
-        Scanner objScanner = new Scanner(System.in);
-
-        String NIM = "";
+    public static void inputNim() {
         do {
-            System.out.print("Enter your NIM (input 99 untuk kembali): ");
-            NIM = objScanner.next();
-            if (NIM.equals("99")) {
-                this.menu();
+            System.out.print("Masukkan NIM Anda (masukkan 99 untuk kembali): ");
+            nimStudentListHolder = objScanner.next();
+            if (nimStudentListHolder.equals("99")) {
+                menu();
             } else {
-                if ((Boolean) checkNim(NIM)) {
-                    objStudent.menu();
-                }
-            }
-        } while (!NIM.equals("99"));
-    }
-
-    static Object checkNim(String nimInput) {
-        boolean isNIMExist = false;
-
-        if (nimInput.length() == 15) {
-            for (int i = 0; i < Admin.studentListIndex; i++) {
-                if (Admin.getStudentList()[i][2].equals(nimInput)) {
-                    isNIMExist = true;
-
-                    Student.setName(Admin.getStudentList()[i][0]);
-                    Student.setFaculty(Admin.getStudentList()[i][1]);
-                    Student.setNim(Admin.getStudentList()[i][2]);
-                    Student.setProgramStudi(Admin.getStudentList()[i][3]);
-                    break;
+                if (checkNim()[0].equals(0)) {
+                    System.out.println("NIM anda belum terdaftar!\n");
+                } else if (checkNim()[0].equals(1)) {
+                    System.out.println("Anda telah login ...\n");
+                } else if (checkNim()[0].equals(2)) {
+                    System.out.println("NIM anda tidak valid! Harus 15 karakter.\n");
                 } else {
-                    isNIMExist = false;
+
                 }
             }
-            if (isNIMExist) {
-                System.out.println("NIM valid dan terdapat dalam array.");
-                return Boolean.TRUE;
-            } else {
-                System.out.println("NIM valid tetapi tidak terdapat dalam array.");
-                return Boolean.FALSE;
+
+        } while (!(checkNim()[0].equals(1)));
+
+        Student student = new Student("", "", "", "");
+        student.displayInfo();
+    }
+
+    public static Object[] checkNim() {
+        Object[] object = new Object[1];
+        object[0] = 0;
+
+        for (String string : nimStudentList) {
+            if (string.equals(nimStudentListHolder)) {
+                // nim belum didaftarkan oleh admin
+                object[0] = 1;
+                return object;
+            } else if (string.length() != 15) {
+                // panjang nim melebihi atau kurang dari 15 digit
+                object[0] = 2;
+                return object;
             }
-        } else {
-            System.out.println("NIM tidak valid. Harus berjumlah 15 digit.");
-            return Boolean.FALSE;
         }
+
+        return object;
     }
 
-    public void addTempStudent() {
-
+    public static void addTempStudent() {
+        System.out.println("Daftar Data siswa :");
     }
 
-    public static void addTempBooks(int tempBorrowedBookIndex, Object idBuku, String nim, int duration) {
-        Student.borrowedBooks[tempBorrowedBookIndex][0] = nim;
-        Student.borrowedBooks[tempBorrowedBookIndex][1] = idBuku.toString();
-        Student.borrowedBooks[tempBorrowedBookIndex][2] = duration;
+    public static void addTempBooks() {
+        System.out.println("Daftar Buku :");
     }
 
     public static void main(String[] args) {
-        LibrarySystem objLibrarySystem = new LibrarySystem();
-
-        objLibrarySystem.menu();
+        menu();
     }
 }

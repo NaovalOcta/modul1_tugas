@@ -1,5 +1,5 @@
 package util;
 
 public interface iMenu {
-    void menu();
+    abstract void menu();
 }

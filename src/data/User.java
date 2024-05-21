@@ -1,58 +1,53 @@
 package data;
 
+import java.util.ArrayList;
 import books.Book;
 
 public class User {
-    static Admin objAdmin = new Admin();
-    private static Object[][] bookList = new Object[100][100];
-    private static int bookListIndex;
+    private static ArrayList<Book> bookList = new ArrayList<>();
+    
+    public void displayBooks() {
+        int iterator = 1;
+        if(bookList.isEmpty()) {
+            System.out.println("Belum ada buku yang diinput ...");
+            System.out.println("Kembali ke menu");
 
-    public static Object[][] getBookList() {
+            Student student = new Student("", "", "", "");
+            student.menu();
+        }
+        else {
+            template("No.", "ID Buku", "Nama Buku", "Author", "Kategori", "Stock");
+
+            for (Book book : bookList) {
+                if (book != null) {
+//                    System.out.println("<" + iterator + "> " + book.getbookId() + " - " + book.getTitle() + " - " + book.getAuthor() + " - " + book.getCategory() + " - " + book.getStock());
+                    System.out.println("|| " + iterator + "  || " + book.getbookId() + "\t\t|| " + book.getTitle() + "\t\t|| " + book.getAuthor() + "\t\t|| " + book.getCategory() + "\t|| " + book.getStock() + "\t ||");
+                }
+                iterator++;
+            }
+        }
+    }
+
+    public static void addBooks(String bookId, String title, String author, String category, int stock) {
+        bookList.add(new Book(bookId, title, author, category, stock));
+    }
+
+    public ArrayList<Book> getBookList() {
         return bookList;
     }
 
-    public void displayBooks() {
-        int no = 1;
-        boolean isEmpty = true;
-        for (Object[] row : bookList) {
-            for (Object cell : row) {
-                if (cell != null) {
-                    isEmpty = false;
-                    break;
-                }
-            }
-            if (!isEmpty) {
-                break;
-            }
-        }
-
-        if (isEmpty) {
-            System.out.println("Tidak terdapat data buku!");
-        } else {
-            System.out.println("====================================================================================================");
-            System.out.println("|| No. || ID Buku\t\t\t|| Nama Buku\t\t\t|| Author\t\t|| Category\t\t|| Stock\t  ||");
-            System.out.println("====================================================================================================");
-            for (int i = 0; i < bookList.length; i++) {
-                if (bookList[i][0] != null && bookList[i][1] != null && bookList[i][2] != null && bookList[i][3] != null && bookList[i][4] != null) {
-                    System.out.println("|| " + no++ + "  || " + bookList[i][0] + "\t\t|| " + bookList[i][1] + "\t\t\t|| " + bookList[i][2] + "\t\t|| " + bookList[i][3] + "\t\t|| " + bookList[i][4] + " ||\t");
-                }
-            }
-            System.out.println("====================================================================================================");
-        }
+    // Method Overload
+    public void template(String no, String bookId, String judul, String author, String category) {
+        System.out.println("====================================================================================================");
+        System.out.println("|| " + no + " || "+ bookId +"\t\t\t|| "+ judul +"\t\t|| "+ author +"\t\t|| "+ category +"\t|| Durasi\t||");
+        System.out.println("====================================================================================================");
+        System.out.println();
     }
-
-    public static void addBook() {
-        // input data ke array
-        bookList[bookListIndex][0] = Book.getBookId();
-        bookList[bookListIndex][1] = Book.getTitle();
-        bookList[bookListIndex][2] = Book.getAuthor();
-        bookList[bookListIndex][3] = Book.getCategory();
-        bookList[bookListIndex][4] = Book.getStock();
-
-        bookListIndex += 1;
-//        System.out.println(bookListIndex);
-        System.out.println("Buku berhasil ditambahkan.");
-
-        objAdmin.menu();
+    // Method Overload
+    public void template(String no, String bookId, String judul, String author, String category, String stock) {
+        System.out.println("====================================================================================================");
+        System.out.println("|| " + no + " || "+ bookId +"\t\t\t|| "+ judul +"\t\t|| "+ author +"\t\t|| "+ category +"\t|| "+ stock +"\t||");
+        System.out.println("====================================================================================================");
+        System.out.println();
     }
 }

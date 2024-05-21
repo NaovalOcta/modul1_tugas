@@ -1,224 +1,178 @@
 package data;
 
-import books.HistoryBook;
-import books.StoryBook;
-import books.TextBook;
+import exception.custom.IllegalAdminAccess;
+import exception.custom.IllegalInvalidChoice;
 import util.iMenu;
+import com.main.LibrarySystem;
+import books.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Admin extends User implements iMenu {
-    private static String adminUsername = "Admin";
-    private static String adminPassword = "Admin";
-    private static String[][] studentList = new String[100][100];
-    public static int studentListIndex;
-
-    public static String[][] getStudentList() {
-        return studentList;
-    }
+    private final String adminUsername = "Admin";
+    private final String adminPassword = "Admin";
+    private static ArrayList<Student> studentList = new ArrayList<>();
+    private Scanner objScanner = new Scanner(System.in);
 
     @Override
     public void menu() {
-        Scanner objScanner = new Scanner(System.in);
+        try {
+//            System.out.print("===== Menu Admin =====\n1. Tambah Mahasiswa\n2. Tampilkan Mahasiswa\n3. Input Buku\n4. Tampilkan Daftar Buku\n5. Logout\nPilih antara (1-5): ");
+            System.out.println("====== Admin Menu ======");
+            System.out.println("1. Add Student");
+            System.out.println("2. Add Book");
+            System.out.println("3. Display Registered Student");
+            System.out.println("4. Display Available Books");
+            System.out.println("5. Logout");
+            System.out.print("Choose menu (1-5): ");
+            int choice = objScanner.nextInt();
 
-        System.out.println("====== Admin Menu ======");
-        System.out.println("1. Add Student");
-        System.out.println("2. Add Book");
-        System.out.println("3. Display Registered Student");
-        System.out.println("4. Display Available Books");
-        System.out.println("5. Logout");
-        System.out.print("Choose menu (1-5): ");
-        int choice = objScanner.nextInt();
-
-        switch (choice) {
-            case 1:
-                this.addStudent();
-                break;
-            case 2:
-                System.out.println("1. Story Book");
-                System.out.println("2. History Book");
-                System.out.println("3. Text Book");
-                System.out.print("Choose category (1-3): ");
-                int chooseCategory = objScanner.nextInt();
-
-                switch (chooseCategory) {
-                    case 1:
-                        Admin.inputBook("Story Book");
-                        break;
-                    case 2:
-                        Admin.inputBook("History Book");
-                        break;
-                    case 3:
-                        Admin.inputBook("Text Book");
-                        break;
-                    default:
-                        System.out.println("Angka yang anda masukkan salah!");
-                        break;
-                }
-                break;
-            case 3:
-                this.displayStudents();
-                break;
-            case 4:
-                Admin objAdmin = new Admin();
-
-                objAdmin.displayBooks();
-                break;
-            case 5:
-                Student.logout();
-                break;
+            switch (choice) {
+                case 1:
+                    addStudent();
+                    break;
+                case 2:
+                    inputBook();
+                    break;
+                case 3:
+                    LibrarySystem.addTempStudent();
+                    displayStudents();
+                    break;
+                case 4:
+                    LibrarySystem.addTempBooks();
+                    displayBooks();
+                    break;
+                case 5:
+                    System.out.println("Logout berhasil.\n");
+                    break;
+                default:
+                    throw new IllegalInvalidChoice("Invalid parameter choice!");
+            }
+        } catch (IllegalInvalidChoice e) {
+            System.err.println(e);
+        }
+    }
+    public boolean isAdmin(String username, String password) throws IllegalAdminAccess {
+        if (username.equals(adminUsername) && password.equals(adminPassword)) {
+            return true;
+        } else {
+            throw new IllegalAdminAccess("Invalid parameter!");
         }
     }
     public void addStudent() {
-        Scanner objScanner = new Scanner(System.in);
-
-        boolean isNIMExist = false;
-        do {
-            // input data dari user
-            System.out.print("Name: ");
-            String name = objScanner.nextLine();
-
-            System.out.print("Faculty: ");
-            String faculty = objScanner.nextLine();
-
-            System.out.print("NIM: ");
-            String inputNIM = objScanner.nextLine();
-
-            System.out.print("Program: ");
-            String programStudi = objScanner.nextLine();
-
-            // cek nim apakah sudah 15 digit & tidak terdapat di dalam array
-            if (inputNIM.length() == 15) {
-                for (int i = 0; i < studentListIndex; i++) {
-                    if (studentList[i][2].equals(inputNIM)) {
-                        isNIMExist = true;
-                    } else {
-                        isNIMExist = false;
-                    }
-                }
-                if (!isNIMExist) {
-                    System.out.println("NIM valid dan berhasil ditambahkan.");
-
-                    // input data ke array
-                    studentList[studentListIndex][0] = name;
-                    studentList[studentListIndex][1] = faculty;
-                    studentList[studentListIndex][2] = inputNIM;
-                    studentList[studentListIndex][3] = programStudi;
-
-                    studentListIndex += 1;
-                    this.menu();
-                } else {
-                    System.out.println("NIM valid tetapi NIM sudah terdapat di dalam data");
-                }
-            } else {
-                System.out.println("NIM tidak valid. Harus berjumlah 15 digit.");
-            }
-        } while (isNIMExist);
-    }
-    public static void inputBook(String category) {
-        Scanner objScanner = new Scanner(System.in);
-
-        if (category.equals("Story Book")) {
-            StoryBook objStoryBook = new StoryBook("", "", "", 0);
-
-            // input data dari user
-            System.out.print("Nama Buku: ");
-            objStoryBook.setTitle(objScanner.nextLine());
-
-            System.out.print("Author: ");
-            objStoryBook.setAuthor(objScanner.nextLine());
-
-            System.out.print("Stock: ");
-            objStoryBook.setStock(objScanner.nextInt());
-
-            objStoryBook.setBookId(generateId());
-            objStoryBook.setCategory(category);
-
-            User.addBook();
-        } else if (category.equals("History Book")) {
-            HistoryBook objHistoryBook = new HistoryBook("", "", "",0);
-
-            // input data dari user
-            System.out.print("Nama Buku: ");
-            objHistoryBook.setTitle(objScanner.nextLine());
-
-            System.out.print("Author: ");
-            objHistoryBook.setAuthor(objScanner.nextLine());
-
-            System.out.print("Stock: ");
-            objHistoryBook.setStock(objScanner.nextInt());
-
-            objHistoryBook.setBookId(generateId());
-            objHistoryBook.setCategory(category);
-
-            User.addBook();
-        } else if (category.equals("Text Book")) {
-            TextBook objTextBook = new TextBook("", "", "",0);
-
-            // input data dari user
-            System.out.print("Nama Buku: ");
-            objTextBook.setTitle(objScanner.nextLine());
-
-            System.out.print("Author: ");
-            objTextBook.setAuthor(objScanner.nextLine());
-
-            System.out.print("Stock: ");
-            objTextBook.setStock(objScanner.nextInt());
-
-            objTextBook.setBookId(generateId());
-            objTextBook.setCategory(category);
-
-            User.addBook();
-        } else {
-            System.out.println("Category tidak tersedia");
+        System.out.print("Masukkan Nama: ");
+        String name = objScanner.next();
+        System.out.print("Masukkan NIM: ");
+        String nim = objScanner.next();
+        if (nim.length() != 15) {
+            System.out.println("NIM tidak valid! Harus 15 karakter.\n");
+            menu();
         }
+
+        LibrarySystem librarySystem = new LibrarySystem();
+        for(int i = 0; i < librarySystem.getNimStudentList().size(); i++ ) {
+            if(nim.equals(librarySystem.getNimStudentList().get(i))) {
+                System.out.println("Nim anda sudah terdaftar !");
+                menu();
+            }
+        }
+
+        librarySystem.setNimStudentList(nim);
+
+        System.out.print("Masukkan Fakultas: ");
+        String faculty = objScanner.next();
+        System.out.print("Masukkan Program Studi: ");
+        String programStudi = objScanner.next();
+
+        studentList.add(new Student(name, faculty, nim, programStudi));
+
+        System.out.println("Mahasiswa dengan NIM " + nim + " berhasil ditambahkan ...\n");
+        menu();
+    }
+
+    public void displayStudents() {
+        for (Student student : studentList) {
+//            System.out.println("===================================");
+            System.out.println("Nama            : " + student.getName());
+            System.out.println("NIM             : " + student.getNim());
+            System.out.println("Fakultas        : " + student.getFaculty());
+            System.out.println("Program Studi   : " + student.getprogramStudi());
+            System.out.println("===================================");
+        }
+
+        System.out.println();
+        menu();
+    }
+
+    public void inputBook() {
+        int bookType;
+        do {
+            System.out.println("\nPilih jenis buku:");
+            System.out.println("1. History Book");
+            System.out.println("2. Story Book");
+            System.out.println("3. Text Book");
+            System.out.print("Pilih jenis buku (1-3): ");
+            bookType = objScanner.nextInt();
+            objScanner.nextLine();
+        } while(bookType > 3 || bookType < 1);
+
+        String bookId;
+        System.out.print("Masukkan title buku: ");
+        String title = objScanner.nextLine();
+        System.out.print("Masukkan author buku: ");
+        String author = objScanner.nextLine();
+        System.out.print("Masukkan stock buku: ");
+        int stock = objScanner.nextInt();
+        objScanner.nextLine();
+
+        String category;
+        switch (bookType) {
+            case 1:
+                HistoryBook historyBook = new HistoryBook("", "", "", "", 0);
+                category = historyBook.getCategory();
+                break;
+            case 2:
+                StoryBook storyBook = new StoryBook("", "", "", "", 0);
+                category = storyBook.getCategory();
+                break;
+            case 3:
+                TextBook textBook = new TextBook("", "", "", "", 0);
+                category = textBook.getCategory();
+                break;
+            default:
+                System.out.println("Pilihan tidak valid!");
+                return;
+        }
+        bookId = generateId();
+        User.addBooks(bookId, title, author, category, stock);
+
+        System.out.println("Buku berhasil ditambahkan.\n");
+        menu();
     }
 
     @Override
     public void displayBooks() {
         super.displayBooks();
-        this.menu();
+        menu();
     }
-    public void displayStudents() {
-        if (studentList == null || studentList.length == 0) {
-            System.out.println("Tidak terdapat data student!");
-        } else {
-            System.out.println("List of Registered Student");
-            for (int i = 0; i < studentListIndex; i++) {
-                System.out.println("Nama: " + studentList[i][0]);
-                System.out.println("Fakultas: " + studentList[i][1]);
-                System.out.println("NIM: " + studentList[i][2]);
-                System.out.println("Program Studi: " + studentList[i][3]);
-                System.out.println("");
-            }
-            this.menu();
-        }
-    }
-    public static boolean isAdmin(String inputUsername, String inputPassword) {
-        // cek apakah username dan password sudah sesuai
-        if (inputUsername.equals(adminUsername) && inputPassword.equals(adminPassword)) {
-            return true;
-        } else {
-            System.out.println("Username atau password yang anda masukkan salah!");
-            return false;
-        }
-    }
-    public static String generateId() {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    public String generateId() {
+        StringBuilder idBuilder = new StringBuilder(); // object to construct String more efficiently and customizable
         Random random = new Random();
-        StringBuilder id = new StringBuilder();
 
         for (int i = 0; i < 12; i++) {
-            int index = random.nextInt(characters.length());
-            id.append(characters.charAt(index));
+            idBuilder.append(random.nextInt(10));
+            if ((i + 1) % 4 == 0 && i != 11) {
+                idBuilder.append("-");
+            }
         }
 
-        // Menambahkan strip setiap 4 karakter
-        for (int i = 4; i < id.length(); i += 5) {
-            id.insert(i, "-");
-        }
+        return idBuilder.toString();
+    }
 
-        return id.toString();
+    public ArrayList<Student> getStudentList() {
+        return studentList;
     }
 }
